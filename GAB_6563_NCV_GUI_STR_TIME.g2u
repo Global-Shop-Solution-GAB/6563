@@ -1,0 +1,94 @@
+﻿Program.Sub.Preflight.Start
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+Function.Intrinsic.UI.UsePixels ' Allows you to use Pixels instead of Twips throughout
+V.Local.sStation.Declare
+V.Local.sSQL.Declare
+V.Local.i1.Declare
+V.Local.bExist.Declare
+V.Local.sScan.Declare
+V.Local.sJob.Declare
+V.Local.sSuffix.Declare
+V.Local.sSeq.Declare
+
+F.ODBC.Connection!conx.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+'Check if custom table exists
+F.ODBC.Connection!conx.TableExists("GAB_6563_WIP",V.Local.bExist)
+F.Intrinsic.Control.If(V.Local.bExist,=,False)
+	F.ODBC.Connection!Conx.Execute("CREATE TABLE GAB_6563_WIP (STATION CHAR(8), JOB CHAR(6), SUFFIX CHAR(3), SEQ CHAR(6), EMPLOYEE CHAR(5), WORKCENTER CHAR(4), RECORD_SEQ CHAR(3), START_DATE CHAR(8), START_TIME CHAR(8) );")
+F.Intrinsic.Control.EndIf		
+
+F.Intrinsic.Control.If(V.Caller.Hook,=,15935)
+	f.Intrinsic.String.LPad(v.Caller.Terminal,"0",8,V.Local.sStation)
+	F.Intrinsic.String.Build("select * from JOBS_IN_PROCESS_G where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' ",V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)
+	F.ODBC.Connection!conx.OpenLocalRecordsetRO("rstWIP",V.Local.sSQL)
+
+	F.Intrinsic.Control.If(V.ODBC.conx!rstWIP.EOF,=,False)
+		F.Intrinsic.String.Build("Delete From GAB_6563_WIP where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' ",V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)
+		F.ODBC.Connection!conx.Execute(V.Local.sSQL)	
+	
+		F.Intrinsic.String.Build("insert into GAB_6563_WIP(Station, JOB, SUFFIX, SEQ, EMPLOYEE, WORKCENTER, RECORD_SEQ, START_DATE, START_TIME) values('{0}','{1}','{2}','{3}','{4}','{5}','000','{7}','{8}');", V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.ODBC.conx!rstWIP.FieldVal!RECORD_SEQ, V.ODBC.conx!rstWIP.FieldVal!START_DATE, V.ODBC.conx!rstWIP.FieldVal!START_TIME, V.Local.sSQL)
+		F.ODBC.Connection!conx.Execute(V.Local.sSQL)
+		F.ODBC.conx!rstWIP.Close
+	F.Intrinsic.Control.EndIf
+	
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,15755)
+	F.Intrinsic.String.Replace(V.Passed.000007,"%/","",V.Local.sScan)
+	F.Intrinsic.String.Left(V.Local.sScan,6,V.Local.sJob)
+	F.Intrinsic.String.Mid(V.Local.sScan,7,3,V.Local.sSuffix)
+	F.Intrinsic.String.Right(V.Local.sScan,6,V.Local.sSeq)
+	
+	f.Intrinsic.String.LPad(v.Caller.Terminal,"0",8,V.Local.sStation)
+	F.Intrinsic.String.Build("select * from JOBS_IN_PROCESS_G where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' ",V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)
+	F.ODBC.Connection!conx.OpenLocalRecordsetRO("rstWIP",V.Local.sSQL)
+
+	F.Intrinsic.Control.If(V.ODBC.conx!rstWIP.EOF,=,False)
+		F.Intrinsic.String.Build("Delete From GAB_6563_WIP where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' ",V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)
+		F.ODBC.Connection!conx.Execute(V.Local.sSQL)	
+	
+		F.Intrinsic.String.Build("insert into GAB_6563_WIP(Station, JOB, SUFFIX, SEQ, EMPLOYEE, WORKCENTER, RECORD_SEQ, START_DATE, START_TIME) values('{0}','{1}','{2}','{3}','{4}','{5}','000','{7}','{8}');", V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.ODBC.conx!rstWIP.FieldVal!RECORD_SEQ, V.ODBC.conx!rstWIP.FieldVal!START_DATE, V.ODBC.conx!rstWIP.FieldVal!START_TIME, V.Local.sSQL)
+		F.ODBC.Connection!conx.Execute(V.Local.sSQL)
+		F.ODBC.conx!rstWIP.Close
+	F.Intrinsic.Control.EndIf	
+	
+F.Intrinsic.Control.ElseIf(V.Caller.Hook,=,15890)
+	f.Intrinsic.String.LPad(v.Caller.Terminal,"0",8,V.Local.sStation)
+	F.Intrinsic.String.Build("Delete From GAB_6563_WIP where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' ",V.Local.sStation, Variable.Passed.009990, Variable.Passed.009991, Variable.Passed.009992, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)
+	F.ODBC.Connection!conx.Execute(V.Local.sSQL)	
+	
+	F.Intrinsic.String.Build("select * from GAB_6563_WIP where STATION = '{0}' AND EMPLOYEE = '{4}'",V.Local.sStation, Variable.Passed.009000, Variable.Passed.009001, Variable.Passed.009002, Variable.Passed.009993, Variable.Passed.009996, V.Local.sSQL)	
+	F.Data.DataTable.CreateFromSQL("dtGAB","conx",V.Local.sSQL,True)
+	F.Intrinsic.Control.For(V.Local.i1,0,V.DataTable.dtGAB.RowCount--,1)
+		
+		F.Intrinsic.String.Build("select * from JOBS_IN_PROCESS_G where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' AND START_DATE = '{6}'",V.Local.sStation, V.DataTable.dtGAB(V.Local.i1).JOB!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SUFFIX!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SEQ!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).EMPLOYEE!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).WORKCENTER!FieldValTrim,  V.DataTable.dtGAB(V.Local.i1).START_DATE!FieldValTrim, V.Local.sSQL)
+		F.ODBC.Connection!conx.OpenLocalRecordsetRO("rstWIP",V.Local.sSQL)		
+		
+		F.Intrinsic.Control.If(V.ODBC.conx!rstWIP.EOF,=,False)		
+			F.Intrinsic.String.Build("Update JOBS_IN_PROCESS_G set START_TIME = '{6}' where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' AND START_DATE = '{7}'",V.Local.sStation, V.DataTable.dtGAB(V.Local.i1).JOB!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SUFFIX!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SEQ!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).EMPLOYEE!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).WORKCENTER!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).START_TIME!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).START_DATE!FieldValTrim, V.Local.sSQL)
+			F.ODBC.Connection!conx.Execute(V.Local.sSQL)
+		
+			F.Intrinsic.String.Build("Delete From JOBS_IN_PROCESS_G where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' AND JOB_DESC = 'SUSPENDED' ",V.Local.sStation, V.DataTable.dtGAB(V.Local.i1).JOB!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SUFFIX!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SEQ!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).EMPLOYEE!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).WORKCENTER!FieldValTrim, V.Local.sSQL)
+			F.ODBC.Connection!conx.Execute(V.Local.sSQL)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Build("Delete From GAB_6563_WIP where STATION = '{0}' and JOB = '{1}' and SUFFIX = '{2}' AND SEQ = '{3}' AND EMPLOYEE = '{4}' AND WORKCENTER = '{5}' AND START_DATE = '{6}' ",V.Local.sStation, V.DataTable.dtGAB(V.Local.i1).JOB!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SUFFIX!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).SEQ!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).EMPLOYEE!FieldValTrim, V.DataTable.dtGAB(V.Local.i1).WORKCENTER!FieldValTrim,  V.DataTable.dtGAB(V.Local.i1).START_DATE!FieldValTrim, V.Local.sSQL)
+			F.ODBC.Connection!conx.Execute(V.Local.sSQL)			
+		F.Intrinsic.Control.EndIf
+		F.ODBC.conx!rstWIP.Close
+	F.Intrinsic.Control.Next(V.Local.i1)
+	
+
+F.Intrinsic.Control.EndIf
+
+Program.Sub.Main.End
+
+Program.Sub.Unload.Start
+F.ODBC.Connection!conx.Close
+F.Intrinsic.Control.End
+
+Program.Sub.Unload.End
+
+Program.Sub.Comments.Start
+${$5$}$3.0.0.0$}$1
+${$6$}$dyunus$}$20211223164545635$}$xZ6SHi8g7O0Qsxe6AiO2NH3PnOKQRy0Tv4M+ZS0jh6OoYIRWFdwwbQE4TJ55VJ9FAKlVxUliQ8Y=
+Program.Sub.Comments.End
